@@ -4,80 +4,34 @@
 #include <time.h>
 #include <windows.h>
 
+#define MAX_SCREENS 10 // Limit to the number of screens
+
 typedef struct {
     char name[20];
+    int id;
+    int current_instruction_line;
     SYSTEMTIME timestamp;
-    int instruction_line; // Placeholder for current instruction line
 } Screen;
-Screen currentScreen;
-int isScreenActive = 0;
-// Initialize screen data
-void initializeScreen(Screen* screen, const char* name) {
-    strcpy(screen->name, name);
-    GetLocalTime(&(screen->timestamp));
-    screen->instruction_line = 1;  // Placeholder: Always start at instruction 1
-}
 
-//TIME AND DATE
-void showTimestamp(){
-    SYSTEMTIME st;
-    GetLocalTime(&st);
+Screen screens[MAX_SCREENS];
+int screen_count = 0;
+int active_screen = -1; // No active screen initially
 
-    // Determine AM or PM
+// COLORS FOR PRINTING
+void white() { printf("\033[0;37m"); }
+void green() { printf("\033[0;32m"); }
+void yellow() { printf("\033[0;33m"); }
+
+// TIME AND DATE
+void showTimestamp(SYSTEMTIME st) {
     const char *ampm = (st.wHour >= 12) ? "PM" : "AM";
-    
-    // Convert 24-hour format to 12-hour format
     int hour = st.wHour % 12;
-    if (hour == 0) {
-        hour = 12;  // Handle midnight and noon cases
-    }
-
-    // Output in MM/DD/YYYY, HH:MM:SS AM/PM format
-    printf("(%02d/%02d/%04d, %02d:%02d:%02d %s)", 
-        st.wMonth, 
-        st.wDay, 
-        st.wYear, 
-        hour, 
-        st.wMinute, 
-        st.wSecond, 
-        ampm);
+    if (hour == 0) hour = 12;
+    printf("(%02d/%02d/%04d, %02d:%02d:%02d %s)", st.wMonth, st.wDay, st.wYear, hour, st.wMinute, st.wSecond, ampm);
 }
 
-// Print screen information
-void printScreenInfo(Screen* screen) {
-    printf("There is a screen on:\n\t%s\t", screen->name);
-    printf("Current instruction line: %d/50\n", screen->instruction_line); // Placeholder
-    showTimestamp();
-    printf("\t (Attached)\n");
-}
-//COLORS FOR PRINTING
-void black(){
-    printf("\033[0;30m");
-}
-void red(){
-    printf("\033[0;31m");
-}
-void green(){
-    printf("\033[0;32m");
-}
-void yellow(){
-    printf("\033[0;33m");
-}
-void blue(){
-    printf("\033[0;34m");
-}
-void purple(){
-    printf("\033[0;35m");
-}
-void cyan(){
-    printf("\033[0;36m");
-}
-void white(){
-    printf("\033[0;37m");
-}
-
-//ASCIIART
-void asciiart(){
+// ASCII ART
+void asciiart() {
     printf("  _____  _____  ____  _____  ______  _______     __ \n");
     printf(" / ____|/ ____|/ __  |  __  |  ____|/ ____      / / \n");
     printf("| |    | (___ | |  | | |__) | |__  | (___     _/ /  \n");
@@ -86,130 +40,142 @@ void asciiart(){
     printf("  _____|_____/  ____/|_|    |______|_____/   |_|    \n");
 }
 
-//HEADER PRINTING
-void header(){
+// HEADER PRINTING FOR MAIN MENU
+void header() {
     green();
     printf("Hello, Welcome to CSOPESY commandline!\n");
     yellow();
     printf("Type 'exit' to quit, 'clear' to clear the screen\n");
 }
 
-//CLEAR COMMAND
-void clear(){
+// Create a new screen and add to the list
+void createScreen(char* name) {
+    if (screen_count >= MAX_SCREENS) {
+        printf("Maximum number of screens reached.\n");
+        return;
+    }
+
+    // Initialize the new screen
+    Screen new_screen;
+    strcpy(new_screen.name, name);
+    new_screen.id = screen_count;
+    new_screen.current_instruction_line = 0;
+    GetLocalTime(&new_screen.timestamp);
+
+    // Add to the list of screens
+    screens[screen_count++] = new_screen;
+    active_screen = new_screen.id; // Automatically attach to the new screen
+
+    // Clear the console and display screen details
     system("cls");
-    header();
-}
-//INITIALIZE COMMAND
-void initialize(){
-    printf("Initialize command recognized. Doing something...\n"); 
-}
-//SCREEN COMMAND
-void screen(char* type, char* name){
-    
-    //printf("Screen command recognized. Doing something...\n");
-    clear();
-    white();
-    if(strcmp(type, "-s") == 0){
-        printf("There is a screen on:\n\t%s\t", name);
-        showTimestamp();
-        printf("\t (Attached)\n");
-    }
-    else if(strcmp (type, "-r") == 0){
-        printf("displaying type r \n");
-        printf("There is a screen on:\n\t%s\t", name);
-        showTimestamp();
-        printf("\t (Attached)\n");
-    }
-}
-//SCHEDULER TEST COMMAND
-void schedulertest(){
-    printf("Scheduler-test command recognized. Doing something...\n");  
-}
-//SCHEDULER STOP COMMAND
-void schedulerstop(){
-    printf("Scheduler-stop command recognized. Doing something...\n");  
-}
-//REPORT UTIL COMMAND
-void reportutil(){
-    printf("Report-util command recognized. Doing something...\n");  
+    printf("Process: %s\n", new_screen.name);
+    printf("ID: %d\n", new_screen.id);
+    printf("Current instruction line: %d / 50\n", new_screen.current_instruction_line);
+    printf("Timestamp: ");
+    showTimestamp(new_screen.timestamp);
+    printf("\n");
 }
 
-int main(){
-    asciiart();
-    header();
-    char response[20] = "";
-    
-    while(strcmp(response, "exit") != 0){   
+// Print screen details
+void displayScreen(Screen* scr) {
+    printf("Process: %s\n", scr->name);
+    printf("ID: %d\n", scr->id);
+    printf("Current instruction line: %d / 50\n", scr->current_instruction_line);
+    printf("Timestamp: ");
+    showTimestamp(scr->timestamp);
+    printf("\n");
+}
+
+// Switch to an existing screen
+void attachScreen(char* name) {
+    for (int i = 0; i < screen_count; i++) {
+        if (strcmp(screens[i].name, name) == 0) {
+            active_screen = screens[i].id;
+            // Clear the console and display screen details
+            system("cls");
+            displayScreen(&screens[i]);
+            return;
+        }
+    }
+    printf("Error: Screen '%s' not found.\n", name);  // Error message for non-existent screen
+}
+
+// Detach from the current screen
+void detachScreen() {
+    if (active_screen != -1) {
+        printf("Detached from screen '%s'\n", screens[active_screen].name);
+        active_screen = -1;
+    } else {
+        printf("No screen is currently attached.\n");
+    }
+}
+
+// List all screens
+void listScreens() {
+    if (screen_count == 0) {
+        printf("No screens available.\n");  // Inform user if no screens are present
+    } else {
+        printf("Available screens:\n");
+        for (int i = 0; i < screen_count; i++) {
+            printf("ID: %d, Process: %s\n", screens[i].id, screens[i].name);
+        }
+    }
+}
+
+// Input handler for screens
+void screenHandler(Screen* scr) {
+    char command[20];
+
+    while (1) {
         white();
-        char initial[30];
-        char first[20] = "";
-        char second[20] = "";
-        char third[20] = "";
-        printf("Enter a command: ");
-        scanf(" %[^\n]", initial);
-        //Extract words
-        int i = 0;
-        int wordIndex = 0;
-        while (initial[i] != '\0' && wordIndex < 3) {
-        // Skip leading spaces
-        while (initial[i] == ' ') {
-            i++;
+        printf("\nroot:\\>", scr->name, scr->id);
+        scanf(" %[^\n]", command);
+
+        if (strcmp(command, "exit") == 0) {
+            detachScreen();
+            return; // Return to the main menu
+        } else {
+            scr->current_instruction_line++;
+            printf("Processing command '%s' (line %d)\n", command, scr->current_instruction_line);
         }
 
-        // If we are at a word boundary
-        if (initial[i] != '\0') {
-            // Extract the word based on the current word index
-            if (wordIndex == 0) {
-                // First word
-                int j = 0;
-                while (initial[i] != ' ' && initial[i] != '\0') {
-                    first[j++] = initial[i++];
-                }
-                first[j] = '\0'; // Null-terminate the first word
-            } else if (wordIndex == 1) {
-                // Second word
-                int j = 0;
-                while (initial[i] != ' ' && initial[i] != '\0') {
-                    second[j++] = initial[i++];
-                }
-                second[j] = '\0'; // Null-terminate the second word
-            } else if (wordIndex == 2) {
-                // Third word
-                int j = 0;
-                while (initial[i] != ' ' && initial[i] != '\0') {
-                    third[j++] = initial[i++];
-                }
-                third[j] = '\0'; // Null-terminate the third word
-            }
-            wordIndex++;
+        if (scr->current_instruction_line >= 50) {
+            printf("Instruction limit reached on this screen.\n");
+            detachScreen();
+            return;
         }
     }
-        strcpy(response, first);
-        if (strcmp(response, "clear") == 0){
-            clear();
-            }
-        else if(strcmp(response, "exit") == 0){
-            break;
-            }
-        else if(strcmp(response, "initialize") == 0){
-            initialize();
-            }
-        else if(strcmp(response, "screen") == 0){
-            screen(second, third);
-            }
-        else if(strcmp(response, "scheduler-test") == 0){
-            schedulertest();
-            }
-        else if(strcmp(response, "scheduler-stop") == 0){
-            schedulerstop();
-            }
-        else if(strcmp(response, "report-util") == 0){
-            reportutil();
-            }
-        else
-            printf("Invalid command... \n");
-        }
+}
 
+int main() {
+    char command[30], param1[20];
+    while (1) {
+        if (active_screen == -1) {
+            system("cls"); // Clear console before displaying main menu
+            asciiart();
+            header();  // Show ASCII art and header in the main menu
+            white();
+            printf("Enter a command: ");
+            scanf(" %[^\n]", command);
+
+            if (sscanf(command, "screen -s %s", param1) == 1) {
+                createScreen(param1);
+                screenHandler(&screens[active_screen]); // Handle input for the screen
+            } else if (sscanf(command, "screen -r %s", param1) == 1) {
+                attachScreen(param1);
+                if (active_screen != -1) {
+                    screenHandler(&screens[active_screen]);
+                }
+            } else if (sscanf(command, "screen %s", param1) == 1) {
+                listScreens();
+            } else if (strcmp(command, "exit") == 0) {
+                printf("Exiting program.\n");
+                break;
+            } else {
+                printf("Invalid command.\n");
+            }
+        }
+    }
 
     return 0;
 }
