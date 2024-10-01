@@ -18,6 +18,31 @@ void initializeScreen(Screen* screen, const char* name) {
     screen->instruction_line = 1;  // Placeholder: Always start at instruction 1
 }
 
+//TIME AND DATE
+void showTimestamp(){
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+
+    // Determine AM or PM
+    const char *ampm = (st.wHour >= 12) ? "PM" : "AM";
+    
+    // Convert 24-hour format to 12-hour format
+    int hour = st.wHour % 12;
+    if (hour == 0) {
+        hour = 12;  // Handle midnight and noon cases
+    }
+
+    // Output in MM/DD/YYYY, HH:MM:SS AM/PM format
+    printf("(%02d/%02d/%04d, %02d:%02d:%02d %s)", 
+        st.wMonth, 
+        st.wDay, 
+        st.wYear, 
+        hour, 
+        st.wMinute, 
+        st.wSecond, 
+        ampm);
+}
+
 // Print screen information
 void printScreenInfo(Screen* screen) {
     printf("There is a screen on:\n\t%s\t", screen->name);
@@ -51,31 +76,6 @@ void white(){
     printf("\033[0;37m");
 }
 
-
-//TIME AND DATE
-void showTimestamp(){
-    SYSTEMTIME st;
-    GetLocalTime(&st);
-
-    // Determine AM or PM
-    const char *ampm = (st.wHour >= 12) ? "PM" : "AM";
-    
-    // Convert 24-hour format to 12-hour format
-    int hour = st.wHour % 12;
-    if (hour == 0) {
-        hour = 12;  // Handle midnight and noon cases
-    }
-
-    // Output in MM/DD/YYYY, HH:MM:SS AM/PM format
-    printf("(%02d/%02d/%04d, %02d:%02d:%02d %s)", 
-        st.wMonth, 
-        st.wDay, 
-        st.wYear, 
-        hour, 
-        st.wMinute, 
-        st.wSecond, 
-        ampm);
-}
 //ASCIIART
 void asciiart(){
     printf("  _____  _____  ____  _____  ______  _______     __ \n");
