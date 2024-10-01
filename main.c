@@ -35,7 +35,7 @@ void asciiart() {
     printf("  _____  _____  ____  _____  ______  _______     __ \n");
     printf(" / ____|/ ____|/ __  |  __  |  ____|/ ____      / / \n");
     printf("| |    | (___ | |  | | |__) | |__  | (___     _/ /  \n");
-    printf("| |      ___  | |  | |  ___/|  __|   ___        /   \n");
+    printf("| |      ___  | |  | |  ___/|  __|   ___       /   \n");
     printf("| |____ ____) | |__| | |    | |____ ____) |  | |    \n");
     printf("  _____|_____/  ____/|_|    |______|_____/   |_|    \n");
 }
@@ -49,7 +49,7 @@ void header() {
 }
 
 // process-smi command 
-void process(char* name)
+void smi(char* name)
 {
     // Initialize the new screen
     Screen new_screen;
@@ -64,6 +64,18 @@ void process(char* name)
 
     // Clear the console and display screen details
     system("cls");
+    showTimestamp(new_screen.timestamp);
+    printf("\n+-----------------------------------------------------------------------------------+\n");
+    printf("| NVIDIA-SMI 122.05           DRIVER VERSION: 122.05       CUDA VERSION: 122.05     |\n");
+    printf("|--------------------------------+---------------------------+----------------------|\n");
+    printf("|                                |                           |                      |\n");
+    printf("|                                |                           |                      |\n");
+    printf("|                                |                           |                      |\n");
+    printf("+================================+===========================+======================+\n");
+    printf("|                                |                           |                      |\n");
+    printf("|                                |                           |                      |\n");
+    printf("|                                |                           |                      |\n");
+    printf("+-----------------------------------------------------------------------------------+");
     printf("\n");
 }
 
@@ -192,7 +204,7 @@ int main() {
                 printf("Exiting program.\n");
                 break;
             } else if(strcmp(command, "process-smi") == 0){
-                process(param1);
+                smi(param1);
                 screenHandler(&screens[active_screen]); // Handle input for the screen
             }else {
                 printf("Invalid command.\n");
