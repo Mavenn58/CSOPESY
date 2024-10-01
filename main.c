@@ -48,6 +48,25 @@ void header() {
     printf("Type 'exit' to quit, 'clear' to clear the screen\n");
 }
 
+// process-smi command 
+void process(char* name)
+{
+    // Initialize the new screen
+    Screen new_screen;
+    strcpy(new_screen.name, name);
+    new_screen.id = screen_count;
+    new_screen.current_instruction_line = 0;
+    GetLocalTime(&new_screen.timestamp);
+
+    // Add to the list of screens
+    screens[screen_count++] = new_screen;
+    active_screen = new_screen.id; // Automatically attach to the new screen
+
+    // Clear the console and display screen details
+    system("cls");
+    printf("\n");
+}
+
 // Create a new screen and add to the list
 void createScreen(char* name) {
     if (screen_count >= MAX_SCREENS) {
@@ -168,10 +187,14 @@ int main() {
                 }
             } else if (sscanf(command, "screen %s", param1) == 1) {
                 listScreens();
+            
             } else if (strcmp(command, "exit") == 0) {
                 printf("Exiting program.\n");
                 break;
-            } else {
+            } else if(strcmp(command, "process-smi") == 0){
+                process(param1);
+                screenHandler(&screens[active_screen]); // Handle input for the screen
+            }else {
                 printf("Invalid command.\n");
             }
         }
