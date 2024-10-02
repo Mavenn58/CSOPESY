@@ -3,6 +3,17 @@
 #include <string>
 #include <iostream>
 #include <ctime>
+#include <iomanip>
+
+struct Process {
+    int gpuId;
+    int graphicsId;
+    int computeId;
+    int pid;
+    std::string type;
+    std::string name;
+    int gpuMemoryUsage;
+};
 
 void gpuSummary()
 {
@@ -28,18 +39,20 @@ void dateTime()
     std::cout << ctime(&timestamp);
 }
 
-void displayProcess()
+void displayProcess(const std::vector<Process>& processes)
 {
     std::cout << "\n+----------------------------------------------------------------------------------------------------+\n";
-    std::cout <<"| Processes:                                                                                         |\n";
-    std::cout <<"|  GPU   GI     CI       PID   Type   Process name                                        GPU Memory |\n";
-    std::cout <<"|        ID     ID                                                                        Usage      |\n";
-    std::cout <<"|----------------------------------------------------------------------------------------------------|\n";
-    std::cout <<"|                                                                                                    |\n";
-    std::cout <<"|                                                                                                    |\n";
-    std::cout <<"|                                                                                                    |\n";
-    std::cout <<"+====================================================================================================+\n";
-    std::cout <<"\n";
+    std::cout << "| Processes:                                                                                         |\n";
+    std::cout << "|  GPU   GI     CI       PID   Type   Process name                                        GPU Memory |\n";
+    std::cout << "|        ID     ID                                                                        Usage      |\n";
+    std::cout << "|----------------------------------------------------------------------------------------------------|\n";
+
+    for (const auto& process : processes) {
+        std::cout << "| " << std::setw(4) << process.gpuId << " " << std::setw(4) << process.graphicsId << " " << std::setw(4) << process.computeId << " " << std::setw(6) << process.pid << " " << std::setw(5) << process.type << " " << std::setw(40) << process.name << " " << std::setw(10) << process.gpuMemoryUsage << "MiB |\n";
+    }
+
+    std::cout << "+====================================================================================================+\n";
+    std::cout << "\n";
 }
 
 int main()
@@ -47,6 +60,13 @@ int main()
     system("cls");
     dateTime();
     gpuSummary();
-    displayProcess();
+
+    std::vector<Process> processes = {
+        {0, 1, 2, 1234, "System", "System Process", 100},
+        {0, 3, 4, 5678, "User", "User Process", 200},
+        {0, 5, 6, 9012, "System", "System Process 2", 300}
+    };
+
+    displayProcess(processes);
     return 0; 
 }
