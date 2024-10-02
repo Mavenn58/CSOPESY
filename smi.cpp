@@ -52,9 +52,9 @@ void displayProcess(const std::vector<Process>& processes)
         std::string name = process.name;
         std::string gpuMemoryUsage = process.gpuMemoryUsage;
 
-        // Limit the process name to 30 characters
+        // Limit the process name to  30 characters
         if (name.length() > 30) {
-            name = name.substr(0, 30) + "...";
+            name = "..." + name.substr(name.length()/2, 30);
         }
 
         // Limit the GPU memory usage to 10 characters
@@ -76,7 +76,7 @@ int main()
     gpuSummary();
 
     std::vector<Process> processes = {
-        {0, "N/A", "N/A", 1368, "C+G", "C:\\Program Files\\DataSync\\DataSyncService.exe", "N/A"},
+        {0, "N/A", "N/A", 1368, "C+G", "C:\\Windows\\System32\\dwm.exe", "N/A"},
         {0, "N/A", "N/A", 2166, "C+G", "C:\\Program Files\\ImageProcessing\\AdvancedImageProcessingDaemonWithBatchSupport.exe", "N/A"},
         {0, "N/A", "N/A", 4244, "C+G", "C:\\Program Files\\NetworkMonitor\\NetworkMonitorAgent.exe", "N/A"},
         {0, "N/A", "N/A", 5684, "C+G", "C:\\Program Files\\UserAuth\\UserAuthManager.exe", "N/A"},
