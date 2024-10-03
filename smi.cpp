@@ -62,7 +62,9 @@ void displayProcess(const std::vector<Process>& processes)
             gpuMemoryUsage = gpuMemoryUsage.substr(0, 10) + "...";
         }
 
-        std::cout << "|" << std::setw(4) << process.gpuId << " " << std::setw(8) << process.graphicsId << " " << std::setw(8) << process.computeId << " " << std::setw(6) << process.pid << " " << std::setw(5) << process.type << "    " << std::setw(40) << std::left << name << " " << std::setw(6) << std::right << gpuMemoryUsage << "    |\n";
+        std::cout << "|" << std::setw(4) << process.gpuId << " " << std::setw(8) << process.graphicsId << " " << std::setw(8) << process.computeId 
+        << " " << std::setw(6) << process.pid << " " << std::setw(5) << process.type << "    " << std::setw(40) << std::left << name << " " 
+        << std::setw(6) << std::right << gpuMemoryUsage << "    |\n";
     }
 
     std::cout << "+==========================================================================================+\n";
